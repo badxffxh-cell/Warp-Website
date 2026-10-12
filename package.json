@@ -1,0 +1,23 @@
+{
+  "name": "warp-web-release",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build": "npm run build -w @warp/shared && npm run build -w @warp/ui && npm run build -w @warp/web",
+    "dev": "npm run dev -w @warp/web"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "24.19.2"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.2"
+  }
+}
