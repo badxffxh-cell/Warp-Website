@@ -1,0 +1,4 @@
+.desktop-toolbar { height:40px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:#11141c; border-bottom:1px solid #292d3b; font-size:11px; letter-spacing:2px }
+.desktop-toolbar button { background:transparent; color:#f4f5fa; cursor:pointer; padding:6px 12px }
+.desktop-setup { max-width:520px; margin:7vh auto; padding:32px; border:1px solid #292d3b; border-radius:20px; background:#11141c }
+.desktop-setup > svg { width:48px; height:48px }.desktop-setup h1 {font-size:28px; margin:20px 0}.desktop-setup p {color:#a7adbf; line-height:1.6; margin:16px 0}.desktop-setup form {display:grid;gap:18px}.desktop-setup > button {margin-top:20px;color:#aa97ff;cursor:pointer}.desktop-setup [role=alert] {color:#ffb3be}

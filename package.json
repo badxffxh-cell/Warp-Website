@@ -1,5 +1,5 @@
 {
-  "name": "warp-web-release",
+  "name": "warp-desktop-release",
   "version": "0.1.0",
   "private": true,
   "workspaces": [
@@ -10,8 +10,9 @@
     "node": ">=22.12"
   },
   "scripts": {
-    "build": "npm run build -w @warp/shared && npm run build -w @warp/ui && npm run build -w @warp/web",
-    "dev": "npm run dev -w @warp/web"
+    "build": "npm run build -w @warp/shared && npm run build -w @warp/ui && npm run build -w @warp/desktop",
+    "desktop:build": "npm run build && npm run desktop:build -w @warp/desktop",
+    "desktop:dev": "npm run build -w @warp/shared && npm run build -w @warp/ui && npm run tauri -w @warp/desktop -- dev"
   },
   "devDependencies": {
     "typescript": "5.9.3",

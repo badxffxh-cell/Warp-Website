@@ -1,0 +1,1 @@
+{ "$schema": "../gen/schemas/desktop-schema.json", "identifier": "main", "description": "Janela local do Warp", "windows": ["main"], "permissions": ["core:default", "notification:default"] }
