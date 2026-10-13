@@ -1,48 +1,82 @@
-# Warp para Windows
+# Publicar o site Warp e obter um link para compartilhar
 
-O pacote `warp-desktop.zip` contém o código Tauri 2, a interface compartilhada e seus contratos. Não precisa das pastas dos outros ZIPs. Esta versão oferece contas, perfis e sessões da Fase 1. Chat, servidores, chamadas, câmera e compartilhamento de tela ainda não foram implementados.
+Use o novo `warp-web.zip`, que contém frontend, UI e contratos compartilhados. Ele não depende da pasta da API. Esta entrega publica somente as funcionalidades da Fase 1.
 
-## Usar o instalador
+## 1. Configure o destino da API
 
-Se a pasta `instalador` estiver presente, execute `Warp_0.1.0_x64-setup.exe`. Ele instala para seu usuário e pode baixar o WebView2 oficial da Microsoft se necessário. A compilação não tem certificado comercial de assinatura de código.
+Extraia o ZIP. Abra o `vercel.json` **na raiz da pasta warp-web**. Troque somente o domínio de exemplo pelo domínio HTTPS real que o Railway gerou:
 
-Na primeira abertura, preencha:
-
-1. **Endereço da API:** domínio HTTPS gerado pelo Railway, sem `/v1` ou `/health`.
-2. **Endereço do site:** domínio HTTPS de produção da Vercel, igual ao `WEB_URL`/`CORS_ORIGINS` da API.
-3. Salve a conexão e entre na sua conta. O site e o aplicativo usam as mesmas contas.
-
-O endereço da API deve ser direto para o Railway; não use `/api` aqui. O aplicativo verifica `/health` antes de salvar a conexão. Em produção exige HTTPS.
-
-Marque **Manter conectado** para persistir a sessão no Gerenciador de Credenciais do Windows. A credencial não vai para localStorage nem para o JavaScript da interface. Sem essa opção, a sessão fica somente na memória até encerrar o processo. Fechar a janela mantém o Warp na bandeja; selecione **Sair** no menu da bandeja para encerrar. A configuração fica em `%APPDATA%\app.warp.desktop\connection.json`, sem senhas.
-
-**Conexão** permite alterar os endereços e testar notificações nativas. Trocar a conexão remove a credencial local anterior; revogue sessões antigas pela conta, se necessário. Notificações de mensagens serão conectadas quando o módulo de mensagens existir. Links de verificação e recuperação de e-mail abrem o site; conclua a ação lá e volte ao aplicativo.
-
-## Compilar no Windows
-
-Instale Node.js 24 LTS, Rust stable para `x86_64-pc-windows-msvc`, Visual Studio Build Tools com **Desenvolvimento para desktop com C++**, Windows SDK e WebView2 Runtime. Reinicie o terminal após instalar as ferramentas.
-
-Abra o PowerShell na raiz extraída `warp-desktop`:
-
-```powershell
-npm.cmd ci
-npm.cmd run desktop:build
+```json
+{
+  "source": "/api/:path*",
+  "destination": "https://SEU-DOMINIO-REAL.up.railway.app/:path*"
+}
 ```
 
-Instalador: `apps/desktop/src-tauri/target/release/bundle/nsis/`. Executável: `apps/desktop/src-tauri/target/release/warp-desktop.exe`.
+Preserve `/:path*` no final. Não adicione `/v1` ao destino: o cliente já inclui `/v1`. A API permanece no Railway; a Vercel encaminha as requisições do navegador.
 
-Para desenvolvimento:
+Se o domínio Railway ainda não foi gerado, publique o site com o arquivo de exemplo apenas para descobrir seu endereço Vercel. As funções de conta não funcionarão até substituir o destino e publicar novamente.
 
-```powershell
-npm.cmd run desktop:dev
+## 2. Envie ao GitHub
+
+Crie um repositório `warp-web`. Envie **todo o conteúdo de dentro da pasta warp-web**, incluindo `apps`, `packages`, lockfile, `tsconfig.base.json` e `vercel.json`. O `package.json` deve aparecer na raiz. Não envie o ZIP fechado nem `.env`.
+
+Não selecione `apps/web` como raiz na Vercel: o pacote já tem uma raiz independente com seus workspaces internos.
+
+## 3. Importe na Vercel
+
+Na Vercel: Add New → Project → importe `warp-web`. Configure:
+
+| Campo | Valor |
+|---|---|
+| Root Directory | raiz do repositório (`./`) |
+| Framework | Vite |
+| Node.js | 24.x |
+| Install Command | `npm ci` |
+| Build Command | `npm run build` |
+| Output Directory | `apps/web/dist` |
+
+O `vercel.json` já define comandos e diretório. Em Environment Variables, antes do deploy, adicione para Production:
+
+```dotenv
+VITE_API_URL=/api
 ```
 
-Somente builds de desenvolvimento aceitam HTTP em localhost/127.0.0.1. O instalador exige API remota HTTPS, sem servidor Node no computador do usuário.
+Não use a URL Railway nessa variável para este modo: `/api` faz o navegador usar a mesma origem e a Vercel encaminha a requisição. Não coloque SESSION_SECRET, RESEND_API_KEY nem DATABASE_URL na Vercel.
 
-## Verificação antes de distribuir
+Clique Deploy. Copie o **domínio de produção estável** exibido no projeto, semelhante a `https://seu-projeto.vercel.app`. O nome pode variar conforme disponibilidade; não existe um endereço previamente reservado neste pacote.
 
-Teste em outro Windows: instalar, configurar API, entrar, marcar Manter conectado, encerrar pela bandeja, reabrir, alterar perfil e conferir a alteração no site. Revogue a sessão do desktop pelo navegador e confirme que o aplicativo exige login. Teste login temporário, avatar, bandeja e notificação.
+## 4. Autorize o domínio no Railway
 
-`TESTES-RELEASE.md` informa o que foi executado. Build não equivale a teste manual de todos os recursos no WebView2. Não há teste de voz entre redes porque o módulo ainda não existe.
+Volte às variáveis da API e configure:
 
-Referências: [pré-requisitos](https://v2.tauri.app/start/prerequisites/), [instalador Windows](https://v2.tauri.app/distribute/windows-installer/), [bandeja](https://v2.tauri.app/learn/system-tray/).
+```dotenv
+WEB_URL=https://DOMINIO-REAL-DO-SEU-SITE.vercel.app
+CORS_ORIGINS=https://DOMINIO-REAL-DO-SEU-SITE.vercel.app
+COOKIE_SAME_SITE=lax
+```
+
+Salve e faça redeploy da API. Se alterou o destino em vercel.json, envie a alteração ao GitHub e espere o novo deploy da Vercel. Se alterou VITE_API_URL, faça novo build/deploy; variáveis Vite são incorporadas no build.
+
+## 5. Compartilhe o link correto
+
+Abra o endereço estável do site em uma janela anônima. Ele deve mostrar o Warp sem pedir login da Vercel. Se pedir login da Vercel, confira Deployment Protection e use a URL de produção; ajuste o escopo para deixar o domínio de produção público. Não é necessário tornar todos os previews públicos.
+
+Compartilhe **o endereço do site Vercel**, não o endereço da API ou `/health`. Para usuário final, a única conta necessária deve ser a conta Warp.
+
+## 6. Confira a conexão
+
+Abra `https://DOMINIO-DO-SITE.vercel.app/api/health`. Deve retornar JSON com `"status":"ok"`. Depois teste cadastro, login, confirmação de e-mail e persistência em dois navegadores.
+
+| Problema | Verifique |
+|---|---|
+| `/api/health` retorna HTML | Rewrite da API deve vir antes do fallback SPA; confira domínio destino |
+| 502 ou erro de conexão | Deploy Railway, domínio/porta e endpoint `/health` |
+| Erro de origem | WEB_URL/CORS_ORIGINS devem corresponder ao domínio realmente aberto |
+| Login perde sessão | VITE_API_URL deve ser `/api`; COOKIE_SAME_SITE=lax; HTTPS nos dois serviços |
+| E-mail não chega | Resend, domínio remetente verificado, chave, quotas e pasta de spam |
+| Link enviado abre endereço errado | Atualize WEB_URL no Railway e peça novo link |
+
+O proxy descrito é para HTTP da Fase 1. A configuração WSS/WebRTC será entregue com as fases de comunicação, sem prometer suporte WebSocket por este rewrite.
+
+Fontes: [Vite na Vercel](https://vercel.com/docs/frameworks/frontend/vite), [rewrites para API externa](https://vercel.com/docs/routing/rewrites), [proteção de deploys](https://vercel.com/docs/deployment-protection).
