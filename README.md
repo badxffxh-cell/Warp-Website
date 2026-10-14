@@ -1,3 +1,5 @@
+> **Atualização 0.2.0:** para os projetos existentes, siga primeiro ATUALIZAR-0.2.md. Configure PUBLIC_API_URL na API e consulte VOZ-LIVEKIT.md para chamadas. O roteiro abaixo documenta a instalação inicial.
+
 # Publicar o site Warp e obter um link para compartilhar
 
 Use o novo `warp-web.zip`, que contém frontend, UI e contratos compartilhados. Ele não depende da pasta da API. Esta entrega publica somente as funcionalidades da Fase 1.
@@ -27,14 +29,14 @@ Não selecione `apps/web` como raiz na Vercel: o pacote já tem uma raiz indepen
 
 Na Vercel: Add New → Project → importe `warp-web`. Configure:
 
-| Campo | Valor |
-|---|---|
-| Root Directory | raiz do repositório (`./`) |
-| Framework | Vite |
-| Node.js | 24.x |
-| Install Command | `npm ci` |
-| Build Command | `npm run build` |
-| Output Directory | `apps/web/dist` |
+| Campo            | Valor                      |
+| ---------------- | -------------------------- |
+| Root Directory   | raiz do repositório (`./`) |
+| Framework        | Vite                       |
+| Node.js          | 24.x                       |
+| Install Command  | `npm ci`                   |
+| Build Command    | `npm run build`            |
+| Output Directory | `apps/web/dist`            |
 
 O `vercel.json` já define comandos e diretório. Em Environment Variables, antes do deploy, adicione para Production:
 
@@ -68,14 +70,14 @@ Compartilhe **o endereço do site Vercel**, não o endereço da API ou `/health`
 
 Abra `https://DOMINIO-DO-SITE.vercel.app/api/health`. Deve retornar JSON com `"status":"ok"`. Depois teste cadastro, login, confirmação de e-mail e persistência em dois navegadores.
 
-| Problema | Verifique |
-|---|---|
-| `/api/health` retorna HTML | Rewrite da API deve vir antes do fallback SPA; confira domínio destino |
-| 502 ou erro de conexão | Deploy Railway, domínio/porta e endpoint `/health` |
-| Erro de origem | WEB_URL/CORS_ORIGINS devem corresponder ao domínio realmente aberto |
-| Login perde sessão | VITE_API_URL deve ser `/api`; COOKIE_SAME_SITE=lax; HTTPS nos dois serviços |
-| E-mail não chega | Resend, domínio remetente verificado, chave, quotas e pasta de spam |
-| Link enviado abre endereço errado | Atualize WEB_URL no Railway e peça novo link |
+| Problema                          | Verifique                                                                   |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| `/api/health` retorna HTML        | Rewrite da API deve vir antes do fallback SPA; confira domínio destino      |
+| 502 ou erro de conexão            | Deploy Railway, domínio/porta e endpoint `/health`                          |
+| Erro de origem                    | WEB_URL/CORS_ORIGINS devem corresponder ao domínio realmente aberto         |
+| Login perde sessão                | VITE_API_URL deve ser `/api`; COOKIE_SAME_SITE=lax; HTTPS nos dois serviços |
+| E-mail não chega                  | Resend, domínio remetente verificado, chave, quotas e pasta de spam         |
+| Link enviado abre endereço errado | Atualize WEB_URL no Railway e peça novo link                                |
 
 O proxy descrito é para HTTP da Fase 1. A configuração WSS/WebRTC será entregue com as fases de comunicação, sem prometer suporte WebSocket por este rewrite.
 

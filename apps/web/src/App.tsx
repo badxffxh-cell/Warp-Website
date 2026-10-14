@@ -29,10 +29,12 @@ import {
   type UserProfile,
 } from '@warp/shared';
 import { api, API_URL, RequestError, renewSession, setCsrf } from './api';
+import { Community } from './Community';
 
 type Route = 'login' | 'register' | 'forgot-password' | 'reset-password' | 'verify-email';
 type View = 'overview' | 'profile' | 'security' | 'sessions';
 const initialRoute = window.location.pathname.slice(1) as Route;
+const inviteCode = new URLSearchParams(window.location.search).get('invite');
 const initialToken = new URLSearchParams(window.location.hash.slice(1)).get('token') ?? '';
 if (window.location.hash) window.history.replaceState(null, '', window.location.pathname);
 const statuses = { ONLINE: 'Disponível', AWAY: 'Ausente', BUSY: 'Ocupado', INVISIBLE: 'Invisível' };
@@ -105,6 +107,7 @@ function Avatar({ user, large = false }: { user: UserProfile; large?: boolean })
 }
 
 export function App() {
+  const [community, setCommunity] = useState(true);
   const [user, setUser] = useState<UserProfile | null>(null),
     [loading, setLoading] = useState(true),
     [connectionError, setConnectionError] = useState('');
@@ -118,7 +121,7 @@ export function App() {
   const navigate = (next: Route) => {
     setRoute(next);
     setFeedback('');
-    window.history.pushState(null, '', next === 'login' ? '/' : `/${next}`);
+    window.history.pushState(null, '', (next === 'login' ? '/' : `/${next}`) + (inviteCode ? `?invite=${encodeURIComponent(inviteCode)}` : ''));
   };
   const load = async () => {
     setLoading(true);
@@ -171,6 +174,8 @@ export function App() {
         <p>Conectando seu espaço</p>
       </div>
     );
+  if (user && community && !['reset-password', 'verify-email'].includes(route))
+    return <Community user={user} onAccount={() => setCommunity(false)} onLogout={() => void signOut()} />;
   if (user && !['reset-password', 'verify-email'].includes(route))
     return (
       <div className="app-shell">
@@ -211,6 +216,7 @@ export function App() {
           </div>
           <p className="nav-caption">SUA CONTA</p>
           <nav>
+            <button onClick={() => setCommunity(true)}><Radio size={18}/> Servidores e conversas</button>
             {(
               [
                 { id: 'overview', label: 'Visão geral', icon: LayoutDashboard },
@@ -393,9 +399,9 @@ export function App() {
                   <Radio size={21} />
                   <div>
                     <strong>O começo de novas conexões</strong>
-                    <p>Servidores e canais chegam na próxima etapa de desenvolvimento.</p>
+                    <p>Abra Amigos e conversas para falar com suas pessoas e criar servidores.</p>
                   </div>
-                  <span>FASE 1</span>
+                  <span>WARP 0.2</span>
                 </div>
               </>
             ) : view === 'profile' ? (

@@ -5,7 +5,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "apps/web/dist",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://SUBSTITUA-PELO-DOMINIO-DA-API.up.railway.app/:path*" },
+    { "source": "/api/:path*", "destination": "https://warp-railway.onrender.com/:path*" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
